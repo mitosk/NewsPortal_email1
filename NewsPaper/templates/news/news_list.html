@@ -1,0 +1,35 @@
+{% extends 'default.html' %}
+{% load censor_filters %}
+
+{% block title %}Все новости{% endblock %}
+
+{% block content %}
+    <h2>Все новости и статьи</h2>
+
+    {% for post in posts %}
+        <div class="post">
+            <h2>
+                <a href="/news/{{ post.id }}/">
+                    {{ post.title|censor }}
+                </a>
+            </h2>
+            <div class="post-meta">
+                Дата публикации: {{ post.created_at|date:"d.m.Y H:i" }} |
+                Автор: {{ post.author.user.username }} |
+                Рейтинг: {{ post.rating }} |
+                Тип: {{ post.get_post_type_display }}
+            </div>
+            <div class="post-preview">
+                {{ post.text|truncatechars:20|censor }}
+            </div>
+            <div class="post-categories">
+                Категории:
+                {% for category in post.categories.all %}
+                    {{ category.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% empty %}
+        <p>Новостей пока нет.</p>
+    {% endfor %}
+{% endblock %}
