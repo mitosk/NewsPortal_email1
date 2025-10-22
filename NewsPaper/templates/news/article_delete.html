@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Удалить статью</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 15px 0; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .delete-btn { background: #dc3545; color: white; border: none; }
+        .cancel-btn { background: #6c757d; color: white; border: none; text-decoration: none; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h1>🗑️ Удалить статью</h1>
+
+    <div class="warning">
+        <h3>⚠️ Внимание!</h3>
+        <p>Вы уверены, что хотите удалить статью <strong>"{{ object.title }}"</strong>?</p>
+        <p>Это действие нельзя отменить.</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="delete-btn">🗑️ Удалить</button>
+        <a href="{% url 'article_list' %}" class="cancel-btn">❌ Отмена</a>
+    </form>
+</body>
+</html>

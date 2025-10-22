@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% if object %}Редактировать{% else %}Создать{% endif %} новость</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { max-width: 600px; }
+        label { display: block; margin: 10px 0 5px; }
+        input, textarea, select { width: 100%; padding: 8px; margin: 5px 0 15px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        a { display: inline-block; margin-top: 15px; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>{% if object %}✏️ Редактировать{% else %}📝 Создать{% endif %} новость</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">💾 Сохранить</button>
+    </form>
+
+    <a href="{% url 'news_list' %}">← Назад к списку новостей</a>
+</body>
+</html>

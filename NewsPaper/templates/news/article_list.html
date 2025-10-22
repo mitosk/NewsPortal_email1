@@ -1,41 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Новости</title>
+    <title>Статьи</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        .news-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .article-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
         .pagination { margin: 20px 0; }
-        .pagination a { padding: 5px 10px; margin: 0 5px; text-decoration: none; border: 1px solid #007bff; color: #007bff; }
-        .pagination .current { padding: 5px 10px; margin: 0 5px; background: #007bff; color: white; }
+        .pagination a { padding: 5px 10px; margin: 0 5px; text-decoration: none; border: 1px solid #28a745; color: #28a745; }
+        .pagination .current { padding: 5px 10px; margin: 0 5px; background: #28a745; color: white; }
         nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
+        nav a { margin-right: 15px; text-decoration: none; color: #28a745; }
     </style>
 </head>
 <body>
-    <h1>Все новости</h1>
+    <h1>📄 Все статьи</h1>
 
     <nav>
-        <a href="{% url 'news_search' %}">🔍 Поиск новостей</a>
-        <a href="{% url 'news_create' %}">✏️ Создать новость</a>
-        <a href="{% url 'article_list' %}">📄 Перейти к статьям</a>
+        <a href="{% url 'article_search' %}">🔍 Поиск статей</a>
+        <a href="{% url 'article_create' %}">✏️ Создать статью</a>
+        <a href="{% url 'news_list' %}">📰 Перейти к новостям</a>
         <a href="/admin/">⚙️ Админка</a>
     </nav>
 
-    {% for item in news %}
-        <div class="news-item">
+    {% for item in articles %}
+        <div class="article-item">
             <h2>{{ item.title }}</h2>
             <p>{{ item.text|truncatewords:30 }}</p>
             <p><strong>Автор:</strong> {{ item.author.user.username }}</p>
             <p><strong>Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }}</p>
             <p><strong>Рейтинг:</strong> {{ item.rating }}</p>
             <div>
-                <a href="{% url 'news_edit' item.pk %}">✏️ Редактировать</a> |
-                <a href="{% url 'news_delete' item.pk %}">🗑️ Удалить</a>
+                <a href="{% url 'article_edit' item.pk %}">✏️ Редактировать</a> |
+                <a href="{% url 'article_delete' item.pk %}">🗑️ Удалить</a>
             </div>
         </div>
     {% empty %}
-        <p>📭 Новостей пока нет. <a href="{% url 'news_create' %}">Создайте первую!</a></p>
+        <p>📭 Статей пока нет. <a href="{% url 'article_create' %}">Создайте первую!</a></p>
     {% endfor %}
 
     <!-- Пагинация -->
