@@ -1,0 +1,18 @@
+<div class="category-grid">
+    {% for item in categories_with_counts %}
+    <div class="category-card">
+        <h3>{{ item.category.name }}</h3>
+        <div class="stats">
+            📰 Новостей: {{ item.news_count }}<br>
+            📄 Статей: {{ item.articles_count }}<br>
+            📊 Всего: {{ item.news_count|add:item.articles_count }}
+        </div>
+        <div class="links">
+            <a href="{% url 'news_by_category' item.category.id %}" class="news-link">📰 Новости</a>
+            <a href="{% url 'articles_by_category' item.category.id %}" class="articles-link">📄 Статьи</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>Категории пока не созданы.</p>
+    {% endfor %}
+</div>

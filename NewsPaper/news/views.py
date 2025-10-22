@@ -1,11 +1,11 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Post
+from django.shortcuts import get_object_or_404  # ← ДОБАВИТЬ ЭТОТ ИМПОРТ
+from .models import Post, Category  # ← ДОБАВИТЬ Category В ИМПОРТ
 from .filters import PostFilter
 from .forms import PostForm
 
 
-# Все классы представлений без LoginRequiredMixin
 class NewsList(ListView):
     model = Post
     template_name = 'news/news_list.html'
@@ -122,3 +122,70 @@ class ArticleDelete(DeleteView):
 
     def get_queryset(self):
         return Post.objects.filter(post_type='article')
+
+
+# Альтернативные представления (используют ID вместо slug)
+class NewsByCategory(ListView):
+    model = Post
+    template_name = 'news/news_by_category.html'
+    context_object_name = 'news'
+    paginate_by = 10
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, id=self.kwargs['category_id'])
+        return Post.objects.filter(
+            post_type='news',
+            categories=self.category
+        ).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.category
+        return context
+
+
+class ArticlesByCategory(ListView):
+    model = Post
+    template_name = 'news/articles_by_category.html'
+    context_object_name = 'articles'
+    paginate_by = 10
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, id=self.kwargs['category_id'])
+        return Post.objects.filter(
+            post_type='article',
+            categories=self.category
+        ).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.category
+        return context
+
+
+# ДОБАВИТЬ КЛАСС CategoryList
+class CategoryList(ListView):
+    model = Category
+    template_name = 'news/category_list.html'
+    context_object_name = 'categories'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Вручную считаем количество постов для каждой категории
+        categories_with_counts = []
+        for category in context['categories']:
+            news_count = Post.objects.filter(
+                post_type='news',
+                categories=category
+            ).count()
+            articles_count = Post.objects.filter(
+                post_type='article',
+                categories=category
+            ).count()
+            categories_with_counts.append({
+                'category': category,
+                'news_count': news_count,
+                'articles_count': articles_count
+            })
+        context['categories_with_counts'] = categories_with_counts
+        return context
