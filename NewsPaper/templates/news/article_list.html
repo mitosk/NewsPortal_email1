@@ -17,13 +17,13 @@
     </style>
 </head>
 <body>
-    <h1>📄 Все статьи</h1>
+    <h1>Все статьи</h1>
 
     <nav>
-        <a href="{% url 'article_search' %}">🔍 Поиск статей</a>
-        <a href="{% url 'article_create' %}">✏️ Создать статью</a>
-        <a href="{% url 'news_list' %}">📰 Перейти к новостям</a>
-        <a href="{% url 'category_list' %}">🏷️ По категориям</a>
+        <a href="{% url 'article_search' %}">Поиск статей</a>
+        <a href="{% url 'article_create' %}">Создать статью</a>
+        <a href="{% url 'news_list' %}">Перейти к новостям</a>
+        <a href="{% url 'category_list' %}">По категориям</a>
     </nav>
 
     {% for item in articles %}
@@ -32,9 +32,9 @@
             <p>{{ item.text|truncatewords:50 }}</p>
 
             <div class="meta-info">
-                <strong>👤 Автор:</strong> {{ item.author.user.username }} |
-                <strong>📅 Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }} |
-                <strong>⭐ Рейтинг:</strong> {{ item.rating }}
+                <strong>Автор:</strong> {{ item.author.user.username }} |
+                <strong>Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }} |
+                <strong>Рейтинг:</strong> {{ item.rating }}
             </div>
 
             <div class="actions">
@@ -44,7 +44,7 @@
         </div>
     {% empty %}
         <div class="empty-state">
-            <h3>📭 Статей пока нет</h3>
+            <h3>Статей пока нет</h3>
             <p><a href="{% url 'article_create' %}">Создайте первую статью!</a></p>
         </div>
     {% endfor %}

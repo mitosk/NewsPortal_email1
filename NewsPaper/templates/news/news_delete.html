@@ -14,10 +14,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>🗑️ Удалить новость</h1>
+        <h1>Удалить новость</h1>
 
         <div class="warning">
-            <h3>⚠️ Внимание!</h3>
+            <h3>Внимание!</h3>
             <p>Вы уверены, что хотите удалить эту новость?</p>
         </div>
 
@@ -31,7 +31,7 @@
         <form method="post">
             {% csrf_token %}
             <button type="submit" class="delete-btn">🗑️ Удалить навсегда</button>
-            <a href="{% url 'news_list' %}" class="cancel-btn">❌ Отмена</a>
+            <a href="{% url 'news_list' %}" class="cancel-btn">Отмена</a>
         </form>
     </div>
 </body>

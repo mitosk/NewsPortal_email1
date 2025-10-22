@@ -23,16 +23,16 @@
     <h1>🔍 Поиск новостей</h1>
 
     <nav>
-        <a href="{% url 'news_list' %}">📰 Все новости</a>
-        <a href="{% url 'article_search' %}">📄 Поиск статей</a>
+        <a href="{% url 'news_list' %}">Все новости</a>
+        <a href="{% url 'article_search' %}">Поиск статей</a>
     </nav>
 
     <div class="search-form">
         <h3>Критерии поиска:</h3>
         <form method="get">
             {{ filterset.form.as_p }}
-            <button type="submit" class="btn-search">🔍 Найти</button>
-            <button type="reset" class="btn-reset">♻️ Сбросить</button>
+            <button type="submit" class="btn-search">Найти</button>
+            <button type="reset" class="btn-reset">Сбросить</button>
         </form>
     </div>
 
@@ -45,7 +45,7 @@
         </div>
     {% empty %}
         <div class="empty-state">
-            <p>📭 Новости не найдены. Попробуйте изменить критерии поиска.</p>
+            <p>Новости не найдены. Попробуйте изменить критерии поиска.</p>
         </div>
     {% endfor %}
 

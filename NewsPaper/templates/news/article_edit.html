@@ -17,7 +17,7 @@
 </head>
 <body>
     <div class="form-container">
-        <h1>{% if object %}✏️ Редактировать{% else %}📝 Создать{% endif %} статью</h1>
+        <h1>{% if object %}✏Редактировать{% else %}Создать{% endif %} статью</h1>
 
         <form method="post">
             {% csrf_token %}
@@ -40,7 +40,7 @@
                 <div class="help-text">Выберите одну или несколько категорий</div>
             </div>
 
-            <button type="submit">💾 Сохранить</button>
+            <button type="submit">Сохранить</button>
         </form>
 
         <a href="{% url 'article_list' %}" class="back-link">← Назад к списку статей</a>

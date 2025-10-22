@@ -1,11 +1,15 @@
 <div class="category-grid">
+    <div style="background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h2>Фильтрация по категориям</h2>
+        <p>Выберите категорию для просмотра новостей или статей по конкретной тематике.</p>
+    </div>
     {% for item in categories_with_counts %}
     <div class="category-card">
         <h3>{{ item.category.name }}</h3>
         <div class="stats">
-            📰 Новостей: {{ item.news_count }}<br>
-            📄 Статей: {{ item.articles_count }}<br>
-            📊 Всего: {{ item.news_count|add:item.articles_count }}
+            Новостей: {{ item.news_count }}<br>
+            Статей: {{ item.articles_count }}<br>
+            Всего: {{ item.news_count|add:item.articles_count }}
         </div>
         <div class="links">
             <a href="{% url 'news_by_category' item.category.id %}" class="news-link">📰 Новости</a>

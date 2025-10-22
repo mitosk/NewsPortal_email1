@@ -9,32 +9,47 @@
         .pagination a { padding: 8px 16px; margin: 0 5px; text-decoration: none; border: 1px solid #28a745; color: #28a745; border-radius: 4px; }
         .pagination .current { padding: 8px 16px; margin: 0 5px; background: #28a745; color: white; border-radius: 4px; }
         nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #28a745; font-weight: bold; }
+        nav a { margin-right: 15px; text-decoration: none; color: #28a745; font-weight: bold; padding: 5px 10px; border-radius: 3px; }
+        nav a:hover { background: #28a745; color: white; }
         .category-header { background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .empty-state { text-align: center; padding: 40px; color: #666; }
     </style>
 </head>
 <body>
     <div class="category-header">
-        <h1>📄 Статьи: {{ category.name }}</h1>
+        <h1>Статьи: {{ category.name }}</h1>
         <p>Все статьи в категории "{{ category.name }}"</p>
     </div>
 
     <nav>
-        <a href="{% url 'category_list' %}">🏷️ Все категории</a>
-        <a href="{% url 'article_list' %}">📄 Все статьи</a>
-        <a href="{% url 'news_by_category' category.slug %}">📰 Новости этой категории</a>
+        <a href="{% url 'category_list' %}">Все категории</a>
+        <a href="{% url 'article_list' %}">Все статьи</a>
+        <a href="{% url 'news_by_category' category.id %}">Новости этой категории</a>
+        <a href="{% url 'article_search' %}">Поиск статей</a>
     </nav>
 
     {% for item in articles %}
         <div class="article-item">
             <h2>{{ item.title }}</h2>
             <p>{{ item.text|truncatewords:50 }}</p>
-            <p><strong>👤 Автор:</strong> {{ item.author.user.username }}</p>
-            <p><strong>📅 Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }}</p>
-            <p><strong>⭐ Рейтинг:</strong> {{ item.rating }}</p>
+            <p><strong>Автор:</strong> {{ item.author.user.username }}</p>
+            <p><strong>Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }}</p>
+            <p><strong>Рейтинг:</strong> {{ item.rating }}</p>
+
+            <div class="meta-info">
+                <strong>Категории:</strong>
+                {% for cat in item.categories.all %}
+                    <span style="background: #e9ecef; padding: 2px 8px; border-radius: 3px; margin: 0 5px;">{{ cat.name }}</span>
+                {% empty %}
+                    <span style="color: #999;">без категории</span>
+                {% endfor %}
+            </div>
         </div>
     {% empty %}
-        <p>В этой категории пока нет статей.</p>
+        <div class="empty-state">
+            <h3>В этой категории пока нет статей</h3>
+            <p><a href="{% url 'article_create' %}">Создайте первую статью в этой категории!</a></p>
+        </div>
     {% endfor %}
 
     {% if page_obj.paginator.num_pages > 1 %}
