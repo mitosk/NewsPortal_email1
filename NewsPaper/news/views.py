@@ -1,7 +1,8 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.shortcuts import get_object_or_404  # ← ДОБАВИТЬ ЭТОТ ИМПОРТ
-from .models import Post, Category  # ← ДОБАВИТЬ Category В ИМПОРТ
+from django.shortcuts import get_object_or_404
+from django.db.models import Count, Q
+from .models import Post, Category, Author
 from .filters import PostFilter
 from .forms import PostForm
 
@@ -71,6 +72,29 @@ class NewsCreate(CreateView):
     def form_valid(self, form):
         post = form.save(commit=False)
         post.post_type = 'news'
+
+        # Автоматически устанавливаем автора
+        try:
+            # Пытаемся получить автора по умолчанию
+            from django.contrib.auth.models import User
+            user = User.objects.get(username='default_author')
+            author = Author.objects.get(user=user)
+            post.author = author
+        except (User.DoesNotExist, Author.DoesNotExist):
+            # Если автора по умолчанию нет, берем первого существующего
+            author = Author.objects.first()
+            if author:
+                post.author = author
+            else:
+                # Если вообще нет авторов, создаем нового
+                user = User.objects.create_user(
+                    username='auto_author',
+                    first_name='Автоматический',
+                    last_name='Автор'
+                )
+                author = Author.objects.create(user=user)
+                post.author = author
+
         return super().form_valid(form)
 
 
@@ -102,6 +126,26 @@ class ArticleCreate(CreateView):
     def form_valid(self, form):
         article = form.save(commit=False)
         article.post_type = 'article'
+
+        # Та же логика для статей
+        try:
+            from django.contrib.auth.models import User
+            user = User.objects.get(username='default_author')
+            author = Author.objects.get(user=user)
+            article.author = author
+        except (User.DoesNotExist, Author.DoesNotExist):
+            author = Author.objects.first()
+            if author:
+                article.author = author
+            else:
+                user = User.objects.create_user(
+                    username='auto_author',
+                    first_name='Автоматический',
+                    last_name='Автор'
+                )
+                author = Author.objects.create(user=user)
+                article.author = author
+
         return super().form_valid(form)
 
 
@@ -163,7 +207,6 @@ class ArticlesByCategory(ListView):
         return context
 
 
-# ДОБАВИТЬ КЛАСС CategoryList
 class CategoryList(ListView):
     model = Category
     template_name = 'news/category_list.html'
@@ -173,6 +216,9 @@ class CategoryList(ListView):
         context = super().get_context_data(**kwargs)
         # Вручную считаем количество постов для каждой категории
         categories_with_counts = []
+        total_news = 0
+        total_articles = 0
+
         for category in context['categories']:
             news_count = Post.objects.filter(
                 post_type='news',
@@ -182,10 +228,17 @@ class CategoryList(ListView):
                 post_type='article',
                 categories=category
             ).count()
+
             categories_with_counts.append({
                 'category': category,
                 'news_count': news_count,
                 'articles_count': articles_count
             })
+
+            total_news += news_count
+            total_articles += articles_count
+
         context['categories_with_counts'] = categories_with_counts
+        context['total_news'] = total_news
+        context['total_articles'] = total_articles
         return context
