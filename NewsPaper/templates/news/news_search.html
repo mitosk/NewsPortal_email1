@@ -3,18 +3,20 @@
 <head>
     <title>Поиск новостей</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .search-form { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-        .news-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        .pagination { margin: 20px 0; }
-        .pagination a { padding: 5px 10px; margin: 0 5px; text-decoration: none; border: 1px solid #007bff; color: #007bff; }
-        .pagination .current { padding: 5px 10px; margin: 0 5px; background: #007bff; color: white; }
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .search-form { margin: 20px 0; padding: 25px; border: 2px solid #e9ecef; border-radius: 8px; background: #f8f9fa; }
+        .news-item { border: 1px solid #ddd; padding: 20px; margin: 15px 0; border-radius: 8px; background: #f9f9f9; }
+        .pagination { margin: 30px 0; text-align: center; }
+        .pagination a { padding: 8px 16px; margin: 0 5px; text-decoration: none; border: 1px solid #007bff; color: #007bff; border-radius: 4px; }
         nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #007bff; }
-        form p { margin: 10px 0; }
-        label { display: inline-block; width: 150px; }
-        input, select { padding: 5px; margin: 5px 0; }
-        button { padding: 8px 15px; margin: 5px; cursor: pointer; }
+        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        form p { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { padding: 8px; width: 300px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .btn-search { background: #007bff; color: white; }
+        .btn-reset { background: #6c757d; color: white; }
+        .empty-state { text-align: center; padding: 40px; color: #666; }
     </style>
 </head>
 <body>
@@ -29,8 +31,8 @@
         <h3>Критерии поиска:</h3>
         <form method="get">
             {{ filterset.form.as_p }}
-            <button type="submit">🔍 Найти</button>
-            <button type="reset">♻️ Сбросить</button>
+            <button type="submit" class="btn-search">🔍 Найти</button>
+            <button type="reset" class="btn-reset">♻️ Сбросить</button>
         </form>
     </div>
 
@@ -42,7 +44,9 @@
             <p><strong>Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }}</p>
         </div>
     {% empty %}
-        <p>📭 Новости не найдены. Попробуйте изменить критерии поиска.</p>
+        <div class="empty-state">
+            <p>📭 Новости не найдены. Попробуйте изменить критерии поиска.</p>
+        </div>
     {% endfor %}
 
     <!-- Пагинация с сохранением параметров фильтрации -->
