@@ -30,7 +30,7 @@
 
         <form method="post">
             {% csrf_token %}
-            <button type="submit" class="delete-btn">🗑️ Удалить навсегда</button>
+            <button type="submit" class="delete-btn">Удалить навсегда</button>
             <a href="{% url 'news_list' %}" class="cancel-btn">Отмена</a>
         </form>
     </div>
