@@ -9,7 +9,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-SECRET_KEY = 'django-insecure-your-secret-key-here'
+SECRET_KEY = 'django-insecure-7w#8!n4_7^q$&z$*@!9k=+6!@#8$%^&*(uiopasdfghjklzxcvbnm)'
 
 DEBUG = True
 
@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_filters',
     'news',
-    'accounts',
+    # 'accounts' - УДАЛЕНО
 ]
 
 MIDDLEWARE = [
@@ -39,25 +39,25 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'NewsPortal.urls'
+ROOT_URLCONF = 'NewsPaper.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Путь к корневой папке templates
-        'APP_DIRS': True,  # Поиск шаблонов в папках templates приложений
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',  # ОБЯЗАТЕЛЬНО
-                'django.contrib.auth.context_processors.auth',  # ОБЯЗАТЕЛЬНО
-                'django.contrib.messages.context_processors.messages',  # ОБЯЗАТЕЛЬНО
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'NewsPortal.wsgi.application'
+WSGI_APPLICATION = 'NewsPaper.wsgi.application'
 
 # Database
 DATABASES = {
@@ -98,5 +98,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Sites framework
 SITE_ID = 1
 
-# Login URL for LoginRequiredMixin
-LOGIN_URL = '/admin/login/'
+# Пагинация
+NEWS_PER_PAGE = 10

@@ -1,13 +1,11 @@
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
 from .models import Post
 from .filters import PostFilter
 from .forms import PostForm
 
 
+# Все классы представлений без LoginRequiredMixin
 class NewsList(ListView):
     model = Post
     template_name = 'news/news_list.html'
@@ -64,7 +62,7 @@ class ArticleSearch(ListView):
         return context
 
 
-class NewsCreate(LoginRequiredMixin, CreateView):
+class NewsCreate(CreateView):
     model = Post
     form_class = PostForm
     template_name = 'news/news_edit.html'
@@ -76,7 +74,7 @@ class NewsCreate(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class NewsUpdate(LoginRequiredMixin, UpdateView):
+class NewsUpdate(UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'news/news_edit.html'
@@ -86,7 +84,7 @@ class NewsUpdate(LoginRequiredMixin, UpdateView):
         return Post.objects.filter(post_type='news')
 
 
-class NewsDelete(LoginRequiredMixin, DeleteView):
+class NewsDelete(DeleteView):
     model = Post
     template_name = 'news/news_delete.html'
     success_url = reverse_lazy('news_list')
@@ -95,7 +93,7 @@ class NewsDelete(LoginRequiredMixin, DeleteView):
         return Post.objects.filter(post_type='news')
 
 
-class ArticleCreate(LoginRequiredMixin, CreateView):
+class ArticleCreate(CreateView):
     model = Post
     form_class = PostForm
     template_name = 'news/article_edit.html'
@@ -107,7 +105,7 @@ class ArticleCreate(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ArticleUpdate(LoginRequiredMixin, UpdateView):
+class ArticleUpdate(UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'news/article_edit.html'
@@ -117,7 +115,7 @@ class ArticleUpdate(LoginRequiredMixin, UpdateView):
         return Post.objects.filter(post_type='article')
 
 
-class ArticleDelete(LoginRequiredMixin, DeleteView):
+class ArticleDelete(DeleteView):
     model = Post
     template_name = 'news/article_delete.html'
     success_url = reverse_lazy('article_list')
