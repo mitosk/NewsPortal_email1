@@ -119,3 +119,22 @@ SITE_ID = 1
 
 # Пагинация
 NEWS_PER_PAGE = 10
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+
+EMAIL_HOST_USER = 'cordon-osada@yandex.ru'     # ← твоя почта на Яндексе
+EMAIL_HOST_PASSWORD = 'ipncwgzykszycfem'           # ← пароль приложения из настроек безопасности Яндекса
+#DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = 'newsportal@example.com'
+
+INSTALLED_APPS += ['django_crontab']
+
+CRONJOBS = [
+    ('0 9 * * 1', 'news.cron.weekly_newsletter'),  # каждый понедельник в 09:00
+]
+
+

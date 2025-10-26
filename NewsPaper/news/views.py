@@ -17,6 +17,9 @@ from django.contrib.auth.models import User
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, get_object_or_404
+from .models import Category, Subscription
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
@@ -308,3 +311,16 @@ class CategoryList(ListView):
         context['total_news'] = total_news
         context['total_articles'] = total_articles
         return context
+
+
+@login_required
+def subscribe(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    Subscription.objects.get_or_create(user=request.user, category=category)
+    return redirect('category_list')  # убрали pk=category.id
+
+@login_required
+def unsubscribe(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    Subscription.objects.filter(user=request.user, category=category).delete()
+    return redirect('category_list')  # убрали pk=category.id
