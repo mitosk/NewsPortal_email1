@@ -1,75 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Статьи категории {{ category.name }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-        .article-item { border: 1px solid #ddd; padding: 20px; margin: 15px 0; border-radius: 8px; background: #f0f8ff; }
-        .pagination { margin: 30px 0; text-align: center; }
-        .pagination a { padding: 8px 16px; margin: 0 5px; text-decoration: none; border: 1px solid #28a745; color: #28a745; border-radius: 4px; }
-        .pagination .current { padding: 8px 16px; margin: 0 5px; background: #28a745; color: white; border-radius: 4px; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #28a745; font-weight: bold; padding: 5px 10px; border-radius: 3px; }
-        nav a:hover { background: #28a745; color: white; }
-        .category-header { background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .empty-state { text-align: center; padding: 40px; color: #666; }
-    </style>
-</head>
-<body>
-    <div class="category-header">
-        <h1>Статьи: {{ category.name }}</h1>
-        <p>Все статьи в категории "{{ category.name }}"</p>
-    </div>
+{% extends 'base.html' %}
 
-    <nav>
-        <a href="{% url 'category_list' %}">Все категории</a>
-        <a href="{% url 'article_list' %}">Все статьи</a>
-        <a href="{% url 'news_by_category' category.id %}">Новости этой категории</a>
-        <a href="{% url 'article_search' %}">Поиск статей</a>
-    </nav>
+{% block title %}Статьи категории {{ category.name }}{% endblock %}
 
-    {% for item in articles %}
-        <div class="article-item">
-            <h2>{{ item.title }}</h2>
-            <p>{{ item.text|truncatewords:50 }}</p>
-            <p><strong>Автор:</strong> {{ item.author.user.username }}</p>
-            <p><strong>Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }}</p>
-            <p><strong>Рейтинг:</strong> {{ item.rating }}</p>
+{% block content %}
+<div class="category-header mb-4 p-3 bg-light rounded">
+    <h1>Статьи: {{ category.name }}</h1>
+    <p>Все статьи в категории "{{ category.name }}"</p>
+</div>
 
-            <div class="meta-info">
-                <strong>Категории:</strong>
-                {% for cat in item.categories.all %}
-                    <span style="background: #e9ecef; padding: 2px 8px; border-radius: 3px; margin: 0 5px;">{{ cat.name }}</span>
-                {% empty %}
-                    <span style="color: #999;">без категории</span>
-                {% endfor %}
-            </div>
-        </div>
-    {% empty %}
-        <div class="empty-state">
-            <h3>В этой категории пока нет статей</h3>
-            <p><a href="{% url 'article_create' %}">Создайте первую статью в этой категории!</a></p>
-        </div>
-    {% endfor %}
+<nav class="mb-3">
+    <a href="{% url 'category_list' %}" class="btn btn-outline-success btn-sm">Все категории</a>
+    <a href="{% url 'article_list' %}" class="btn btn-outline-success btn-sm">Все статьи</a>
+    <a href="{% url 'news_by_category' category.id %}" class="btn btn-outline-success btn-sm">Новости этой категории</a>
+    <a href="{% url 'article_search' %}" class="btn btn-outline-success btn-sm">Поиск статей</a>
+</nav>
 
-    {% if page_obj.paginator.num_pages > 1 %}
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">&laquo; первая</a>
-                <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
-            {% endif %}
+{% for item in articles %}
+<div class="post p-3 mb-3 border rounded bg-light">
+    <h2>{{ item.title }}</h2>
+    <p>{{ item.text|truncatewords:50 }}</p>
+    <p class="post-meta">
+        Автор: {{ item.author.user.username }} | Дата: {{ item.created_at|date:"d.m.Y H:i" }} | Рейтинг: {{ item.rating }}
+    </p>
 
-            <span class="current">
-                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-            </span>
+    <p>
+        <strong>Категории:</strong>
+        {% for cat in item.categories.all %}
+            <span class="badge bg-secondary">{{ cat.name }}</span>
+        {% empty %}
+            <span class="text-muted">без категории</span>
+        {% endfor %}
+    </p>
 
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">следующая</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
-            {% endif %}
-        </span>
-    </div>
+    {% if user.is_authenticated and user == item.author.user or user.is_superuser %}
+        <a href="{% url 'post_edit' item.id %}" class="btn btn-warning btn-sm">Редактировать</a>
+        <a href="{% url 'post_delete' item.id %}" class="btn btn-danger btn-sm">Удалить</a>
     {% endif %}
-</body>
-</html>
+</div>
+{% empty %}
+<div class="empty-state text-center p-5 text-muted">
+    <h3>В этой категории пока нет статей</h3>
+    {% if user.is_authenticated %}
+        <p><a href="{% url 'article_create' %}" class="btn btn-success">Создайте первую статью!</a></p>
+    {% else %}
+        <p><a href="{% url 'account_login' %}">Войдите</a>, чтобы создать первую статью!</p>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="pagination mt-4 text-center">
+    {% if page_obj.has_previous %}
+        <a href="?page=1" class="btn btn-outline-success btn-sm">&laquo; первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-success btn-sm">предыдущая</a>
+    {% endif %}
+
+    <span class="btn btn-success btn-sm disabled">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-success btn-sm">следующая</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-success btn-sm">последняя &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

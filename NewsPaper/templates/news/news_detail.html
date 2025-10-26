@@ -1,31 +1,41 @@
-{% extends 'default.html' %}
-{% load censor_filters %}
+{% extends 'base.html' %}
 
-{% block title %}{{ post.title|censor }}{% endblock %}
+{% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-    <article class="post">
-        <h1>{{ post.title|censor }}</h1>
-        <div class="post-meta">
-            Дата публикации: {{ post.created_at|date:"d.m.Y" }} |
-            Автор: {{ post.author.user.username }} |
-            Рейтинг: {{ post.rating }} |
-            Тип: {{ post.get_post_type_display }}
-        </div>
+<div class="post">
+    <h2>{{ post.title }}</h2>
+    <p class="post-meta">
+        Автор: {{ post.author.user.username }} | Дата: {{ post.date_created|date:"d.m.Y H:i" }} | Рейтинг: {{ post.rating }}
+    </p>
+    <p>{{ post.text }}</p>
 
-        <div class="post-content">
-            {{ post.text|censor }}
-        </div>
+    {% if user.is_authenticated and user == post.author.user or user.is_superuser %}
+        <a href="{% url 'post_edit' post.id %}" class="btn btn-warning btn-sm">Редактировать</a>
+        <a href="{% url 'post_delete' post.id %}" class="btn btn-danger btn-sm">Удалить</a>
+    {% endif %}
+</div>
 
-        <div class="post-categories">
-            <strong>Категории:</strong>
-            {% for category in post.categories.all %}
-                {{ category.name }}{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </div>
+<hr>
 
-        <div class="post-actions">
-            <a href="/news/">← Назад к списку новостей</a>
-        </div>
-    </article>
+<h4>Комментарии</h4>
+{% for comment in post.comment_set.all %}
+<div class="mb-3 border p-2">
+    <p><strong>{{ comment.user.username }}</strong> | {{ comment.date_created|date:"d.m.Y H:i" }} | Рейтинг: {{ comment.rating }}</p>
+    <p>{{ comment.text }}</p>
+</div>
+{% empty %}
+<p>Комментариев пока нет.</p>
+{% endfor %}
+
+{% if user.is_authenticated %}
+<h5>Добавить комментарий</h5>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+{% else %}
+<p><a href="{% url 'account_login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+{% endif %}
 {% endblock %}

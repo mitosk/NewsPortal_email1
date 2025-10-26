@@ -1,73 +1,70 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Статьи</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-        .article-item { border: 1px solid #ddd; padding: 20px; margin: 15px 0; border-radius: 8px; background: #f0f8ff; }
-        .pagination { margin: 30px 0; text-align: center; }
-        .pagination a { padding: 8px 16px; margin: 0 5px; text-decoration: none; border: 1px solid #28a745; color: #28a745; border-radius: 4px; }
-        .pagination .current { padding: 8px 16px; margin: 0 5px; background: #28a745; color: white; border-radius: 4px; }
-        nav { margin-bottom: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px; }
-        nav a { margin-right: 20px; text-decoration: none; color: #28a745; font-weight: bold; }
-        .meta-info { color: #666; font-size: 0.9em; margin: 10px 0; }
-        .actions a { margin-right: 15px; text-decoration: none; color: #007bff; }
-        .actions a.delete { color: #dc3545; }
-        .empty-state { text-align: center; padding: 40px; color: #666; }
-    </style>
-</head>
-<body>
-    <h1>Все статьи</h1>
+{% extends 'base.html' %}
 
-    <nav>
-        <a href="{% url 'article_search' %}">Поиск статей</a>
-        <a href="{% url 'article_create' %}">Создать статью</a>
-        <a href="{% url 'news_list' %}">Перейти к новостям</a>
-        <a href="{% url 'category_list' %}">По категориям</a>
-    </nav>
+{% block title %}Все статьи{% endblock %}
 
-    {% for item in articles %}
-        <div class="article-item">
-            <h2>{{ item.title }}</h2>
-            <p>{{ item.text|truncatewords:50 }}</p>
+{% block content %}
+<div class="mb-4">
+    <h1 class="text-center">Все статьи</h1>
+</div>
 
-            <div class="meta-info">
-                <strong>Автор:</strong> {{ item.author.user.username }} |
-                <strong>Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }} |
-                <strong>Рейтинг:</strong> {{ item.rating }}
-            </div>
-
-            <div class="actions">
-                <a href="{% url 'article_edit' item.pk %}">✏Редактировать</a>
-                <a href="{% url 'article_delete' item.pk %}" class="delete">Удалить</a>
-            </div>
-        </div>
-    {% empty %}
-        <div class="empty-state">
-            <h3>Статей пока нет</h3>
-            <p><a href="{% url 'article_create' %}">Создайте первую статью!</a></p>
-        </div>
-    {% endfor %}
-
-    <!-- Пагинация -->
-    {% if page_obj.paginator.num_pages > 1 %}
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">&laquo; первая</a>
-                <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
-            {% endif %}
-
-            <span class="current">
-                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-            </span>
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">следующая</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
-            {% endif %}
-        </span>
-    </div>
+<nav class="mb-3">
+    <a href="{% url 'article_search' %}" class="btn btn-outline-success btn-sm">Поиск статей</a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'article_create' %}" class="btn btn-success btn-sm">Создать статью</a>
     {% endif %}
-</body>
-</html>
+    <a href="{% url 'news_list' %}" class="btn btn-outline-primary btn-sm">Перейти к новостям</a>
+    <a href="{% url 'category_list' %}" class="btn btn-outline-secondary btn-sm">По категориям</a>
+</nav>
+
+{% for item in articles %}
+<div class="post p-3 mb-3 border rounded bg-light">
+    <h2>{{ item.title }}</h2>
+    <p>{{ item.text|truncatewords:50 }}</p>
+
+    <p class="post-meta">
+        Автор: {{ item.author.user.username }} | Дата: {{ item.created_at|date:"d.m.Y H:i" }} | Рейтинг: {{ item.rating }}
+    </p>
+
+    <p>
+        <strong>Категории:</strong>
+        {% for cat in item.categories.all %}
+            <span class="badge bg-secondary">{{ cat.name }}</span>
+        {% empty %}
+            <span class="text-muted">без категории</span>
+        {% endfor %}
+    </p>
+
+    {% if user.is_authenticated and user == item.author.user or user.is_superuser %}
+        <a href="{% url 'article_edit' item.pk %}" class="btn btn-warning btn-sm">Редактировать</a>
+        <a href="{% url 'article_delete' item.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+    {% endif %}
+</div>
+{% empty %}
+<div class="empty-state text-center p-5 text-muted">
+    <h3>Статей пока нет</h3>
+    {% if user.is_authenticated %}
+        <p><a href="{% url 'article_create' %}" class="btn btn-success">Создайте первую статью!</a></p>
+    {% else %}
+        <p><a href="{% url 'account_login' %}">Войдите</a>, чтобы создать первую статью!</p>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="pagination mt-4 text-center">
+    {% if page_obj.has_previous %}
+        <a href="?page=1" class="btn btn-outline-success btn-sm">&laquo; первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-success btn-sm">предыдущая</a>
+    {% endif %}
+
+    <span class="btn btn-success btn-sm disabled">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-success btn-sm">следующая</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-success btn-sm">последняя &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

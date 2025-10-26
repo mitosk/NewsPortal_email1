@@ -1,73 +1,76 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Поиск новостей</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-        .search-form { margin: 20px 0; padding: 25px; border: 2px solid #e9ecef; border-radius: 8px; background: #f8f9fa; }
-        .news-item { border: 1px solid #ddd; padding: 20px; margin: 15px 0; border-radius: 8px; background: #f9f9f9; }
-        .pagination { margin: 30px 0; text-align: center; }
-        .pagination a { padding: 8px 16px; margin: 0 5px; text-decoration: none; border: 1px solid #007bff; color: #007bff; border-radius: 4px; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-        form p { margin: 15px 0; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { padding: 8px; width: 300px; border: 1px solid #ddd; border-radius: 4px; }
-        button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
-        .btn-search { background: #007bff; color: white; }
-        .btn-reset { background: #6c757d; color: white; }
-        .empty-state { text-align: center; padding: 40px; color: #666; }
-    </style>
-</head>
-<body>
-    <h1>🔍 Поиск новостей</h1>
+{% extends 'base.html' %}
 
-    <nav>
-        <a href="{% url 'news_list' %}">Все новости</a>
-        <a href="{% url 'article_search' %}">Поиск статей</a>
-    </nav>
+{% block title %}Поиск новостей{% endblock %}
 
-    <div class="search-form">
-        <h3>Критерии поиска:</h3>
-        <form method="get">
-            {{ filterset.form.as_p }}
-            <button type="submit" class="btn-search">Найти</button>
-            <button type="reset" class="btn-reset">Сбросить</button>
-        </form>
-    </div>
+{% block content %}
+<div class="mb-4">
+    <h1 class="text-center">🔍 Поиск новостей</h1>
+</div>
 
-    {% for item in news %}
-        <div class="news-item">
-            <h2>{{ item.title }}</h2>
-            <p>{{ item.text|truncatewords:30 }}</p>
-            <p><strong>Автор:</strong> {{ item.author.user.username }}</p>
-            <p><strong>Дата:</strong> {{ item.created_at|date:"d.m.Y H:i" }}</p>
-        </div>
-    {% empty %}
-        <div class="empty-state">
-            <p>Новости не найдены. Попробуйте изменить критерии поиска.</p>
-        </div>
-    {% endfor %}
-
-    <!-- Пагинация с сохранением параметров фильтрации -->
-    {% if is_paginated %}
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo; первая</a>
-                <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">предыдущая</a>
-            {% endif %}
-
-            <span class="current">
-                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-            </span>
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">следующая</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">последняя &raquo;</a>
-            {% endif %}
-        </span>
-    </div>
+<nav class="mb-3">
+    <a href="{% url 'news_list' %}" class="btn btn-outline-primary btn-sm">Все новости</a>
+    <a href="{% url 'article_search' %}" class="btn btn-outline-success btn-sm">Поиск статей</a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'news_create' %}" class="btn btn-success btn-sm">Создать новость</a>
     {% endif %}
-</body>
-</html>
+</nav>
+
+<div class="card p-3 mb-4 bg-light">
+    <h5>Критерии поиска:</h5>
+    <form method="get" class="row g-3">
+        {{ filterset.form.as_p }}
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Найти</button>
+            <a href="{% url 'news_search' %}" class="btn btn-secondary">Сбросить</a>
+        </div>
+    </form>
+</div>
+
+{% for item in news %}
+<div class="post p-3 mb-3 border rounded bg-white">
+    <h2>{{ item.title }}</h2>
+    <p>{{ item.text|truncatewords:50 }}</p>
+
+    <p class="post-meta">
+        Автор: {{ item.author.user.username }} | Дата: {{ item.created_at|date:"d.m.Y H:i" }} | Рейтинг: {{ item.rating }}
+    </p>
+
+    <p>
+        <strong>Категории:</strong>
+        {% for cat in item.categories.all %}
+            <span class="badge bg-secondary">{{ cat.name }}</span>
+        {% empty %}
+            <span class="text-muted">без категории</span>
+        {% endfor %}
+    </p>
+
+    {% if user.is_authenticated and user == item.author.user or user.is_superuser %}
+        <a href="{% url 'news_edit' item.pk %}" class="btn btn-warning btn-sm">Редактировать</a>
+        <a href="{% url 'news_delete' item.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+    {% endif %}
+</div>
+{% empty %}
+<div class="empty-state text-center p-5 text-muted">
+    <h3>Новости не найдены</h3>
+    <p>Попробуйте изменить критерии поиска.</p>
+</div>
+{% endfor %}
+
+{% if is_paginated %}
+<div class="pagination mt-4 text-center">
+    {% if page_obj.has_previous %}
+        <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline-primary btn-sm">&laquo; первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline-primary btn-sm">предыдущая</a>
+    {% endif %}
+
+    <span class="btn btn-primary btn-sm disabled">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline-primary btn-sm">следующая</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline-primary btn-sm">последняя &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

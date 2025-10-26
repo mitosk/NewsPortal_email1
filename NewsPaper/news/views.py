@@ -5,6 +5,72 @@ from django.db.models import Count, Q
 from .models import Post, Category, Author
 from .filters import PostFilter
 from .forms import PostForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.shortcuts import redirect
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import DeleteView
+from .models import Post
+from django.contrib.auth.models import User
+from django.views.generic.edit import UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Post
+    template_name = 'news/post_delete.html'
+    success_url = reverse_lazy('home')  # или другая стартовая страница
+
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author.user or self.request.user.is_superuser
+
+
+# список постов
+class PostListView(ListView):
+    model = Post
+    template_name = 'news/post_list.html'
+    context_object_name = 'posts'
+
+# детальная страница
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'news/post_detail.html'
+    context_object_name = 'post'
+
+# создание поста
+class PostCreateView(PermissionRequiredMixin, CreateView):
+    model = Post
+    fields = ['title', 'text', 'category']
+    template_name = 'news/post_form.html'
+    permission_required = 'news.add_post'
+
+# редактирование поста
+class PostUpdateView(PermissionRequiredMixin, UpdateView):
+    model = Post
+    fields = ['title', 'text', 'category']
+    template_name = 'news/post_edit.html'
+    permission_required = 'news.change_post'
+
+# редактирование профиля
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    fields = ['first_name', 'last_name', 'email']  # выбираем, какие поля можно редактировать
+    template_name = 'news/profile_edit.html'  # путь к твоему шаблону
+    success_url = reverse_lazy('home')  # куда редирект после сохранения
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+# добавление в группу authors
+@login_required
+def become_author(request):
+    author_group, _ = Group.objects.get_or_create(name='authors')
+    if not request.user.groups.filter(name='authors').exists():
+        author_group.user_set.add(request.user)
+    return redirect('/')
 
 
 class NewsList(ListView):
