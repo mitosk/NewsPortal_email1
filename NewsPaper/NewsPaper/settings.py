@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.yandex',
+    'django_celery_beat',
     # 'accounts' - УДАЛЕНО
 ]
 
@@ -114,9 +115,6 @@ STATIC_URL = 'static/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Sites framework
-SITE_ID = 1
-
 # Пагинация
 NEWS_PER_PAGE = 10
 
@@ -126,16 +124,16 @@ EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
 
-EMAIL_HOST_USER = 'cordon-osada@yandex.ru'     # ← твоя почта на Яндексе
-EMAIL_HOST_PASSWORD = 'ipncwgzykszycfem'           # ← пароль приложения из настроек безопасности Яндекса
+EMAIL_HOST_USER = 'cordon-osada@yandex.ru'
+EMAIL_HOST_PASSWORD = 'ipncwgzykszycfem'
 #DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = 'newsportal@example.com'
 
-INSTALLED_APPS += ['django_crontab']
-
 CRONJOBS = [
-    ('0 9 * * 1', 'news.cron.weekly_newsletter'),  # каждый понедельник в 09:00
+    ('0 8 * * 1', 'news.cron.weekly_newsletter'),  # каждый понедельник в 08:00
 ]
+
+INSTALLED_APPS += ['django_crontab']
 
 # Настройки Celery
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
