@@ -8,6 +8,9 @@ from django.contrib.auth.models import Group, User
 from .models import Post, Category, Author, Subscription
 from .filters import PostFilter
 from .forms import PostForm
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+
 
 # 🔹 Импорт Celery-задачи
 from .tasks import notify_subscribers
@@ -294,3 +297,21 @@ def unsubscribe(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     Subscription.objects.filter(user=request.user, category=category).delete()
     return redirect('category_list')
+
+
+# Для главной страницы (напр. NewsListView)
+@method_decorator(cache_page(60), name='dispatch')  # 60 секунд
+class NewsListView(ListView):
+    model = Post
+    template_name = 'news/news_list.html'
+    context_object_name = 'posts'
+    ordering = ['-dateCreation']
+    paginate_by = 10
+
+
+# Для страницы новости (детальная страница)
+@method_decorator(cache_page(300), name='dispatch')  # 300 секунд (5 минут)
+class NewsDetailView(DetailView):
+    model = Post
+    template_name = 'news/news_detail.html'
+    context_object_name = 'post'
