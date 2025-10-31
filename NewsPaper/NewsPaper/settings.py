@@ -5,10 +5,8 @@ Django settings for NewsPortal project.
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
 SECRET_KEY = 'django-insecure-7w#8!n4_7^q$&z$*@!9k=+6!@#8$%^&*(uiopasdfghjklzxcvbnm)'
 
 DEBUG = True
@@ -31,7 +29,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.yandex',
     'django_celery_beat',
-    # 'accounts' - УДАЛЕНО
 ]
 
 SITE_ID = 1
@@ -89,18 +86,10 @@ DATABASES = {
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalization
@@ -112,30 +101,31 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Пагинация
+# Pagination
 NEWS_PER_PAGE = 10
 
+# Email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
-
 EMAIL_HOST_USER = 'cordon-osada@yandex.ru'
 EMAIL_HOST_PASSWORD = 'ipncwgzykszycfem'
-#DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = 'newsportal@example.com'
 
-CRONJOBS = [
-    ('0 8 * * 1', 'news.cron.weekly_newsletter'),  # каждый понедельник в 08:00
-]
+# Администраторы для логов по email
+ADMINS = [('Admin', 'cordon-osada@yandex.ru')]
 
+# CRON
+CRONJOBS = [
+    ('0 8 * * 1', 'news.cron.weekly_newsletter'),
+]
 INSTALLED_APPS += ['django_crontab']
 
-# Настройки Celery
+# Celery
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -143,7 +133,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Moscow'
 
-
+# Caching
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
@@ -151,43 +141,105 @@ CACHES = {
     }
 }
 
+# === ЛОГИРОВАНИЕ ===
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'style' : '{',
-    'formatters': {
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
-    },
+
     'filters': {
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        },
+        'require_debug_true': {'()': 'django.utils.log.RequireDebugTrue'},
+        'require_debug_false': {'()': 'django.utils.log.RequireDebugFalse'},
     },
+
+    'formatters': {
+        'console_verbose': {'format': '[{asctime}] {levelname} {message}', 'style': '{'},
+        'console_warning': {'format': '[{asctime}] {levelname} {pathname} — {message}', 'style': '{'},
+        'console_error': {'format': '[{asctime}] {levelname} {pathname} — {message}', 'style': '{'},
+        'file_general': {'format': '[{asctime}] {levelname} [{module}] {message}', 'style': '{'},
+        'file_errors': {'format': '[{asctime}] {levelname} {pathname} — {message}', 'style': '{'},
+        'security': {'format': '[{asctime}] {levelname} [{module}] {message}', 'style': '{'},
+        'mail': {'format': '[{asctime}] {levelname} {pathname} — {message}', 'style': '{'},
+    },
+
     'handlers': {
         'console': {
-            'level': 'INFO',
-            'filters': ['require_debug_true'],
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+            'filters': ['require_debug_true'],
+            'formatter': 'console_verbose',
+        },
+        'console_warning': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'filters': ['require_debug_true'],
+            'formatter': 'console_warning',
+        },
+        'console_error': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'filters': ['require_debug_true'],
+            'formatter': 'console_error',
+        },
+        'file_general': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'general.log'),
+            'filters': ['require_debug_false'],
+            'formatter': 'file_general',
+        },
+        'file_errors': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'errors.log'),
+            'formatter': 'file_errors',
+        },
+        'file_security': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'security.log'),
+            'formatter': 'security',
         },
         'mail_admins': {
             'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['require_debug_false'],
+            'formatter': 'mail',
+        },
     },
+
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'console_warning', 'console_error', 'file_general'],
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['file_errors', 'mail_admins'],
             'level': 'ERROR',
             'propagate': False,
-        }
-    }
+        },
+        'django.server': {
+            'handlers': ['file_errors', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['file_security'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
 }
-
